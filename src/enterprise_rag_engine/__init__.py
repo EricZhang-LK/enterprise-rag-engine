@@ -1,6 +1,10 @@
 """Enterprise RAG Engine package."""
 
-from enterprise_rag_engine.document_pipeline.parsers import PdfTextParser
+from enterprise_rag_engine.document_pipeline.parsers import (
+    DocxParser,
+    MarkdownParser,
+    PdfTextParser,
+)
 from enterprise_rag_engine.interfaces import (
     BaseEmbedder,
     BaseEvaluator,
@@ -35,7 +39,9 @@ __all__ = [
     "Document",
     "DocumentChunk",
     "DocumentType",
+    "DocxParser",
     "Embedding",
+    "MarkdownParser",
     "ParseResult",
     "ParseStatus",
     "PdfTextParser",
