@@ -55,6 +55,37 @@ This project starts with a strict engineering baseline:
 - `pytest-cov` for coverage reporting
 - MIT license for open-source friendliness
 
+## Development
+
+Create and activate a virtual environment:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+Install development dependencies:
+
+```powershell
+python -m pip install -e ".[dev]"
+```
+
+Run quality checks:
+
+```powershell
+ruff check .
+ruff format --check .
+mypy src tests
+pytest
+```
+
+Install pre-commit hooks:
+
+```powershell
+pre-commit install
+pre-commit run --all-files
+```
+
 ## Learning Notes
 
 Each major design decision will be recorded in `docs/adr/`.
