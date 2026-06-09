@@ -28,6 +28,11 @@ class ParseStatus(StrEnum):
     FAILED = "failed"
 
 
+class OcrStatus(StrEnum):
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+
+
 class Document(BaseModel):
     model_config = ConfigDict(frozen=True)
 
@@ -70,6 +75,43 @@ class DocumentChunk(BaseModel):
     @property
     def character_count(self) -> int:
         return len(self.content)
+
+
+class TableBlock(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    rows: tuple[tuple[str, ...], ...]
+    caption: str | None = None
+    page_number: int | None = Field(default=None, ge=1)
+    section_path: tuple[str, ...] = Field(default_factory=tuple)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @property
+    def row_count(self) -> int:
+        return len(self.rows)
+
+    @property
+    def column_count(self) -> int:
+        if not self.rows:
+            return 0
+        return max(len(row) for row in self.rows)
+
+    @property
+    def is_rectangular(self) -> bool:
+        if not self.rows:
+            return True
+        return all(len(row) == self.column_count for row in self.rows)
+
+
+class OCRResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    text: str
+    status: OcrStatus
+    page_number: int | None = Field(default=None, ge=1)
+    confidence: float | None = Field(default=None, ge=0, le=1)
+    errors: tuple[str, ...] = Field(default_factory=tuple)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class ParseResult(BaseModel):

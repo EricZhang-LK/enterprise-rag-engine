@@ -4,6 +4,7 @@ from collections.abc import Sequence
 from enterprise_rag_engine.models import (
     Document,
     DocumentChunk,
+    OCRResult,
     ParseResult,
     RetrievalResult,
 )
@@ -77,3 +78,11 @@ class BaseEvaluator(ABC):
     @abstractmethod
     def evaluate(self) -> dict[str, float]:
         """Return metric names and values."""
+
+
+class BaseOCRProvider(ABC):
+    """Extract text from image-like document pages."""
+
+    @abstractmethod
+    def extract_text(self, source_uri: str) -> tuple[OCRResult, ...]:
+        """Return OCR results for a source document or image."""
