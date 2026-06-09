@@ -4,6 +4,7 @@ from enterprise_rag_engine.document_pipeline.parsers import (
     DocxParser,
     MarkdownParser,
     PdfTextParser,
+    StructuredPdfParser,
 )
 from enterprise_rag_engine.interfaces import (
     BaseEmbedder,
@@ -46,5 +47,6 @@ __all__ = [
     "ParseStatus",
     "PdfTextParser",
     "RetrievalResult",
+    "StructuredPdfParser",
     "__version__",
 ]
