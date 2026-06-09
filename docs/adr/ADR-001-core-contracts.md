@@ -4,6 +4,12 @@
 
 Accepted
 
+## 中文摘要
+
+本 ADR 记录 `enterprise-rag-engine` 的核心契约设计：使用 Pydantic 模型定义数据边界，
+使用抽象基类定义组件行为边界。这样可以让文档解析、分块、embedding、向量库、检索和
+评测模块在后续扩展时保持清晰、可测试、可替换。
+
 ## Context
 
 The RAG engine will include document parsers, splitters, embedders, vector stores,
