@@ -86,6 +86,22 @@ pre-commit install
 pre-commit run --all-files
 ```
 
+## API
+
+Run the development server:
+
+```powershell
+uvicorn enterprise_rag_engine.api.app:app --reload
+```
+
+Available endpoints:
+
+| Method | Path | Description |
+|---|---|---|
+| GET | `/health` | Service health check |
+| GET | `/docs` | Swagger UI generated from OpenAPI |
+| GET | `/openapi.json` | OpenAPI schema |
+
 ## Learning Notes
 
 Each major design decision will be recorded in `docs/adr/`.
