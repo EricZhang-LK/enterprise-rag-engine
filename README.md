@@ -102,6 +102,23 @@ Available endpoints:
 | GET | `/docs` | Swagger UI generated from OpenAPI |
 | GET | `/openapi.json` | OpenAPI schema |
 
+## Configuration
+
+Copy `.env.example` to `.env` for local overrides:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Supported settings:
+
+| Variable | Default | Description |
+|---|---|---|
+| `APP_NAME` | `enterprise-rag-engine` | Service name used in API metadata and health checks |
+| `APP_ENV` | `dev` | Runtime environment: `dev`, `test`, or `prod` |
+| `APP_VERSION` | `0.1.0` | Service version |
+| `LOG_LEVEL` | `INFO` | Python logging level |
+
 ## Learning Notes
 
 Each major design decision will be recorded in `docs/adr/`.

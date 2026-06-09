@@ -12,6 +12,7 @@ license = { file = "LICENSE" }
 authors = [{ name = "zyk75" }]
 dependencies = [
     "fastapi>=0.115",
+    "pydantic-settings>=2.5",
     "pydantic>=2.8",
 ]
 

@@ -1,10 +1,11 @@
-from enterprise_rag_engine import __version__
 from enterprise_rag_engine.api.schemas.health import HealthResponse
+from enterprise_rag_engine.settings import get_settings
 
 
 def get_health_status() -> HealthResponse:
+    settings = get_settings()
     return HealthResponse(
-        service="enterprise-rag-engine",
+        service=settings.app_name,
         status="ok",
-        version=__version__,
+        version=settings.app_version,
     )
