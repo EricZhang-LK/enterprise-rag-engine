@@ -71,6 +71,7 @@ class PdfTextParser(BaseParser):
 
 
 def _extract_page_texts(reader: Any, errors: list[str]) -> list[tuple[int, str]]:
+    # Extract at page granularity so later citation and evaluation can verify page retention.
     page_texts: list[tuple[int, str]] = []
     for index, page in enumerate(getattr(reader, "pages", ()), start=1):
         try:
@@ -94,6 +95,7 @@ def _page_chunk(
     page_number: int,
     text: str,
 ) -> DocumentChunk:
+    # Page-level chunks are a safe first fallback before W3 introduces finer chunking strategies.
     return DocumentChunk(
         document_id=document_id,
         content=text,

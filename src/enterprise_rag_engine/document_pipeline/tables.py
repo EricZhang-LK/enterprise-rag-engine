@@ -12,6 +12,7 @@ def normalize_table_rows(rows: list[list[Any]]) -> tuple[tuple[str, ...], ...]:
 
 
 def table_to_markdown(table: TableBlock) -> str:
+    # Markdown is the default LLM-friendly fallback when exact table structure is unavailable.
     if not table.rows:
         return ""
 

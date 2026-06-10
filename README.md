@@ -9,9 +9,9 @@ retrieval-augmented generation systems.
 RAG Demo，而是围绕文档解析、分块、混合检索、重排、引用溯源、自动化评测、
 流式 API、多租户边界和可观测性逐步构建的工程化作品。
 
-当前阶段已经完成 W1 工程基线：`src layout`、质量门禁、核心数据模型、ABC 组件
-契约、FastAPI 基础结构、配置、日志和统一异常响应。后续将进入 PDF 文本解析和文档
-管道建设。
+当前阶段已经完成 W1 工程基线和 W2 文档解析基础能力：PDF、Markdown、Word、
+结构化 PDF、表格降级、OCR Provider 抽象和 Parser Golden Dataset。下一阶段将进入
+chunk 分块系统建设。
 
 This repository is part of a 24-week LLM application engineering learning plan. The goal
 is not to build a toy RAG demo, but to gradually implement a system with document
@@ -20,9 +20,9 @@ multi-tenant controls, and observability.
 
 ## Current Milestone
 
-- Stage: W1 completed
-- Focus: engineering baseline, core contracts, FastAPI scaffold, configuration, logging, errors
-- Status: ready for W2 document parsing work
+- Stage: W2 completed
+- Focus: document parsing, structure preservation, table fallback, OCR abstraction, parser golden dataset
+- Status: ready for W3 chunking system work
 
 ## W1 Results
 
@@ -35,6 +35,18 @@ multi-tenant controls, and observability.
 | API scaffold | FastAPI app factory and `/health` endpoint |
 | Runtime basics | Settings, `.env.example`, logging configuration, standard error responses |
 | Verification | 12 tests passing, coverage above 95% |
+
+## W2 Results
+
+| Parser / Module | Purpose | Preserved Structure |
+|---|---|---|
+| `PdfTextParser` | Basic PDF text extraction | page number, source URI, content hash |
+| `MarkdownParser` | Markdown parsing | heading-based `section_path` |
+| `DocxParser` | Word document parsing | `Heading` style based `section_path` |
+| `StructuredPdfParser` | Optional Docling-based structured PDF parsing | Markdown export, table-like layout fallback |
+| `TableBlock` | Unified table representation | rows, caption, page, section path |
+| `OcrDocumentParser` | OCR result normalization | page number, confidence, OCR errors |
+| Parser Golden Dataset | Parser quality baseline | required text, page numbers, section paths, table flags |
 
 ## Planned Capabilities
 
@@ -87,6 +99,27 @@ flowchart LR
     API --> Settings["Settings"]
     API --> Errors["Exception Handlers"]
     API --> Logging["Logging"]
+```
+
+## Document Pipeline
+
+```mermaid
+flowchart TD
+    Source["Source Document"] --> Parser["Parser"]
+    Parser --> ParseResult["ParseResult"]
+    ParseResult --> Document["Document"]
+    ParseResult --> Chunks["DocumentChunk[]"]
+    Chunks --> Metadata["ChunkMetadata"]
+
+    Parser --> Pdf["PdfTextParser"]
+    Parser --> Md["MarkdownParser"]
+    Parser --> Docx["DocxParser"]
+    Parser --> Structured["StructuredPdfParser"]
+    Parser --> OCR["OcrDocumentParser"]
+
+    Structured --> Table["TableBlock / Markdown Fallback"]
+    OCR --> Provider["BaseOCRProvider"]
+    ParseResult --> Golden["Parser Golden Dataset"]
 ```
 
 ## Engineering Baseline

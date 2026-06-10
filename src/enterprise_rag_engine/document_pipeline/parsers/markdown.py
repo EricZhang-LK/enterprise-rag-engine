@@ -55,6 +55,7 @@ class MarkdownParser(BaseParser):
 
 
 def _section_chunks(*, source_uri: str, document: Document) -> list[DocumentChunk]:
+    # Markdown headings provide reliable structure; keep them as section_path metadata.
     sections: list[DocumentChunk] = []
     heading_stack: list[str] = []
     current_lines: list[str] = []
@@ -98,6 +99,7 @@ def _read_markdown_file(source_uri: str) -> str:
 
 
 def _parse_heading(line: str) -> tuple[int, str] | None:
+    # Only ATX headings with a space after # are treated as structural headings.
     stripped = line.lstrip()
     prefix_length = len(stripped) - len(stripped.lstrip("#"))
     if prefix_length == 0 or prefix_length > 6:
