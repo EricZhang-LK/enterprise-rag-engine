@@ -7,6 +7,7 @@ from enterprise_rag_engine.document_pipeline.parsers import (
     PdfTextParser,
     StructuredPdfParser,
 )
+from enterprise_rag_engine.document_pipeline.splitters import RecursiveSplitter
 from enterprise_rag_engine.interfaces import (
     BaseEmbedder,
     BaseEvaluator,
@@ -55,6 +56,7 @@ __all__ = [
     "ParseResult",
     "ParseStatus",
     "PdfTextParser",
+    "RecursiveSplitter",
     "RetrievalResult",
     "StructuredPdfParser",
     "TableBlock",
