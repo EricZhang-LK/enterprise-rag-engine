@@ -7,7 +7,15 @@ from enterprise_rag_engine.document_pipeline.parsers import (
     PdfTextParser,
     StructuredPdfParser,
 )
-from enterprise_rag_engine.document_pipeline.splitters import RecursiveSplitter
+from enterprise_rag_engine.document_pipeline.splitters import ParentChildSplitter, RecursiveSplitter
+from enterprise_rag_engine.document_pipeline.tokenization import (
+    BaseTokenCounter,
+    HuggingFaceTokenCounter,
+    TiktokenTokenCounter,
+    TokenBudget,
+    TokenCounter,
+    TokenSpan,
+)
 from enterprise_rag_engine.interfaces import (
     BaseEmbedder,
     BaseEvaluator,
@@ -41,6 +49,7 @@ __all__ = [
     "BaseParser",
     "BaseRetriever",
     "BaseSplitter",
+    "BaseTokenCounter",
     "BaseVectorStore",
     "ChunkMetadata",
     "ChunkType",
@@ -55,10 +64,16 @@ __all__ = [
     "OcrStatus",
     "ParseResult",
     "ParseStatus",
+    "ParentChildSplitter",
     "PdfTextParser",
     "RecursiveSplitter",
     "RetrievalResult",
     "StructuredPdfParser",
     "TableBlock",
+    "HuggingFaceTokenCounter",
+    "TokenBudget",
+    "TokenCounter",
+    "TokenSpan",
+    "TiktokenTokenCounter",
     "__version__",
 ]
