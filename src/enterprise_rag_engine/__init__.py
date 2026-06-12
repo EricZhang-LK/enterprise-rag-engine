@@ -1,5 +1,6 @@
 """Enterprise RAG Engine package."""
 
+from enterprise_rag_engine.document_pipeline import AsyncDocumentPipeline
 from enterprise_rag_engine.document_pipeline.parsers import (
     DocxParser,
     MarkdownParser,
@@ -56,6 +57,7 @@ __all__ = [
     "BaseSplitter",
     "BaseTokenCounter",
     "BaseVectorStore",
+    "AsyncDocumentPipeline",
     "ChunkMetadata",
     "ChunkRole",
     "ChunkType",
