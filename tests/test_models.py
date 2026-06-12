@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from enterprise_rag_engine import (
     ChunkMetadata,
+    ChunkRole,
     Document,
     DocumentChunk,
     DocumentType,
@@ -42,6 +43,40 @@ def test_chunk_metadata_rejects_invalid_page_number() -> None:
 
     with pytest.raises(ValidationError):
         ChunkMetadata(source_uri="demo.pdf", document_id=document.id, page_number=0)
+
+
+def test_chunk_metadata_exposes_enterprise_fields_with_defaults() -> None:
+    document = Document(source_uri="demo.pdf", type=DocumentType.PDF, content="hello rag")
+
+    metadata = ChunkMetadata(source_uri="demo.pdf", document_id=document.id)
+
+    assert metadata.chunk_role is ChunkRole.STANDALONE
+    assert metadata.has_table is False
+    assert metadata.metadata == {}
+
+
+def test_chunk_metadata_rejects_invalid_page_range() -> None:
+    document = Document(source_uri="demo.pdf", type=DocumentType.PDF, content="hello rag")
+
+    with pytest.raises(ValidationError):
+        ChunkMetadata(
+            source_uri="demo.pdf",
+            document_id=document.id,
+            page_number=2,
+            end_page_number=1,
+        )
+
+
+def test_chunk_metadata_rejects_invalid_char_range() -> None:
+    document = Document(source_uri="demo.pdf", type=DocumentType.PDF, content="hello rag")
+
+    with pytest.raises(ValidationError):
+        ChunkMetadata(
+            source_uri="demo.pdf",
+            document_id=document.id,
+            start_char=10,
+            end_char=2,
+        )
 
 
 def test_retrieval_result_requires_positive_rank() -> None:

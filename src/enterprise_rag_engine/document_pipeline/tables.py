@@ -59,9 +59,17 @@ def table_to_chunk(
             source_uri=source_uri,
             document_id=document_id,
             page_number=table.page_number,
+            end_page_number=table.page_number,
             section_path=table.section_path,
             content_hash=sha256(markdown.encode("utf-8")).hexdigest(),
+            splitter="table_to_chunk",
+            start_char=0,
+            end_char=len(markdown),
+            has_table=True,
+            metadata={"table_format": "markdown"},
         ),
+        start_char=0,
+        end_char=len(markdown),
     )
 
 

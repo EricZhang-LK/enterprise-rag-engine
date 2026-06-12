@@ -7,7 +7,11 @@ from enterprise_rag_engine.document_pipeline.parsers import (
     PdfTextParser,
     StructuredPdfParser,
 )
-from enterprise_rag_engine.document_pipeline.splitters import ParentChildSplitter, RecursiveSplitter
+from enterprise_rag_engine.document_pipeline.splitters import (
+    ParentChildSplitter,
+    RecursiveSplitter,
+    SemanticSplitter,
+)
 from enterprise_rag_engine.document_pipeline.tokenization import (
     BaseTokenCounter,
     HuggingFaceTokenCounter,
@@ -28,6 +32,7 @@ from enterprise_rag_engine.interfaces import (
 )
 from enterprise_rag_engine.models import (
     ChunkMetadata,
+    ChunkRole,
     ChunkType,
     Document,
     DocumentChunk,
@@ -52,6 +57,7 @@ __all__ = [
     "BaseTokenCounter",
     "BaseVectorStore",
     "ChunkMetadata",
+    "ChunkRole",
     "ChunkType",
     "Document",
     "DocumentChunk",
@@ -68,6 +74,7 @@ __all__ = [
     "PdfTextParser",
     "RecursiveSplitter",
     "RetrievalResult",
+    "SemanticSplitter",
     "StructuredPdfParser",
     "TableBlock",
     "HuggingFaceTokenCounter",

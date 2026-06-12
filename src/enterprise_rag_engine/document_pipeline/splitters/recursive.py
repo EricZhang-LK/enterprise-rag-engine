@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from hashlib import sha256
 
+from enterprise_rag_engine.document_pipeline.tokenization import TokenCounter
 from enterprise_rag_engine.interfaces import BaseSplitter
 from enterprise_rag_engine.models import (
     ChunkMetadata,
+    ChunkRole,
     ChunkType,
     Document,
     DocumentChunk,
@@ -61,6 +63,7 @@ class RecursiveSplitter(BaseSplitter):
         self.max_chars = max_chars
         self.overlap_chars = overlap_chars
         self.separators = separators
+        self.token_counter = TokenCounter()
 
     def split(self, document: Document) -> tuple[DocumentChunk, ...]:
         text = document.content
@@ -71,8 +74,14 @@ class RecursiveSplitter(BaseSplitter):
         chunk_spans = self._merge_spans(text, leaf_spans)
 
         return tuple(
-            self._build_chunk(document=document, text=text, span=span)
-            for span in chunk_spans
+            self._build_chunk(
+                document=document,
+                text=text,
+                span=span,
+                chunk_index=index,
+                chunk_count=len(chunk_spans),
+            )
+            for index, span in enumerate(chunk_spans)
             if text[span.start : span.end].strip()
         )
 
@@ -130,12 +139,27 @@ class RecursiveSplitter(BaseSplitter):
 
         return tuple(span for span in merged if span.end > span.start)
 
-    def _build_chunk(self, *, document: Document, text: str, span: TextSpan) -> DocumentChunk:
+    def _build_chunk(
+        self,
+        *,
+        document: Document,
+        text: str,
+        span: TextSpan,
+        chunk_index: int,
+        chunk_count: int,
+    ) -> DocumentChunk:
         content = text[span.start : span.end]
         metadata = ChunkMetadata(
             source_uri=document.source_uri,
             document_id=document.id,
             content_hash=_content_hash(content),
+            chunk_index=chunk_index,
+            chunk_count=chunk_count,
+            chunk_role=ChunkRole.STANDALONE,
+            splitter=self.__class__.__name__,
+            token_count=self.token_counter.count(content),
+            start_char=span.start,
+            end_char=span.end,
         )
         return DocumentChunk(
             document_id=document.id,

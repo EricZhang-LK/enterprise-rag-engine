@@ -4,6 +4,7 @@ from enterprise_rag_engine.document_pipeline.splitters.recursive import Recursiv
 from enterprise_rag_engine.interfaces import BaseSplitter
 from enterprise_rag_engine.models import (
     ChunkMetadata,
+    ChunkRole,
     ChunkType,
     Document,
     DocumentChunk,
@@ -45,9 +46,15 @@ class ParentChildSplitter(BaseSplitter):
         parent_chunks = self.parent_splitter.split(document)
         result: list[DocumentChunk] = []
 
-        for parent in parent_chunks:
-            result.append(parent)
-            result.extend(self._child_chunks(document=document, parent=parent))
+        for parent_index, parent in enumerate(parent_chunks):
+            parent_with_role = _with_parent_metadata(
+                document=document,
+                parent=parent,
+                chunk_index=parent_index,
+                chunk_count=len(parent_chunks),
+            )
+            result.append(parent_with_role)
+            result.extend(self._child_chunks(document=document, parent=parent_with_role))
 
         return tuple(result)
 
@@ -93,9 +100,19 @@ def _rebase_child_chunk(
         source_uri=document.source_uri,
         document_id=document.id,
         page_number=parent.metadata.page_number,
+        end_page_number=parent.metadata.end_page_number,
         section_path=parent.metadata.section_path,
         tenant_id=parent.metadata.tenant_id,
         content_hash=_content_hash(child.content),
+        chunk_index=child.metadata.chunk_index,
+        chunk_count=child.metadata.chunk_count,
+        chunk_role=ChunkRole.CHILD,
+        splitter="ParentChildSplitter",
+        token_count=child.metadata.token_count,
+        start_char=child_start,
+        end_char=child_end,
+        has_table=child.metadata.has_table,
+        metadata={"parent_id": parent.id},
     )
     return DocumentChunk(
         document_id=document.id,
@@ -105,6 +122,42 @@ def _rebase_child_chunk(
         parent_id=parent.id,
         start_char=child_start,
         end_char=child_end,
+    )
+
+
+def _with_parent_metadata(
+    *,
+    document: Document,
+    parent: DocumentChunk,
+    chunk_index: int,
+    chunk_count: int,
+) -> DocumentChunk:
+    metadata = ChunkMetadata(
+        source_uri=document.source_uri,
+        document_id=document.id,
+        page_number=parent.metadata.page_number,
+        end_page_number=parent.metadata.end_page_number,
+        section_path=parent.metadata.section_path,
+        tenant_id=parent.metadata.tenant_id,
+        content_hash=parent.metadata.content_hash,
+        chunk_index=chunk_index,
+        chunk_count=chunk_count,
+        chunk_role=ChunkRole.PARENT,
+        splitter="ParentChildSplitter",
+        token_count=parent.metadata.token_count,
+        start_char=parent.start_char,
+        end_char=parent.end_char,
+        has_table=parent.metadata.has_table,
+    )
+    return DocumentChunk(
+        id=parent.id,
+        document_id=parent.document_id,
+        content=parent.content,
+        chunk_type=parent.chunk_type,
+        metadata=metadata,
+        parent_id=parent.parent_id,
+        start_char=parent.start_char,
+        end_char=parent.end_char,
     )
 
 

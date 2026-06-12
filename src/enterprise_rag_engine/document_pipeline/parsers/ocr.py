@@ -49,8 +49,14 @@ class OcrDocumentParser(BaseParser):
             },
         )
         chunks = tuple(
-            _ocr_chunk(source_uri=source_uri, document_id=document.id, result=result)
-            for result in successful_results
+            _ocr_chunk(
+                source_uri=source_uri,
+                document_id=document.id,
+                result=result,
+                chunk_index=index,
+                chunk_count=len(successful_results),
+            )
+            for index, result in enumerate(successful_results)
             if result.text
         )
 
@@ -63,7 +69,14 @@ class OcrDocumentParser(BaseParser):
         )
 
 
-def _ocr_chunk(*, source_uri: str, document_id: str, result: OCRResult) -> DocumentChunk:
+def _ocr_chunk(
+    *,
+    source_uri: str,
+    document_id: str,
+    result: OCRResult,
+    chunk_index: int,
+    chunk_count: int,
+) -> DocumentChunk:
     return DocumentChunk(
         document_id=document_id,
         content=result.text,
@@ -71,8 +84,16 @@ def _ocr_chunk(*, source_uri: str, document_id: str, result: OCRResult) -> Docum
             source_uri=source_uri,
             document_id=document_id,
             page_number=result.page_number,
+            end_page_number=result.page_number,
             content_hash=sha256(result.text.encode("utf-8")).hexdigest(),
+            chunk_index=chunk_index,
+            chunk_count=chunk_count,
+            splitter="OcrDocumentParser",
+            start_char=0,
+            end_char=len(result.text),
         ),
+        start_char=0,
+        end_char=len(result.text),
     )
 
 

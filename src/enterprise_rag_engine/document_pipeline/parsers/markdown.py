@@ -91,7 +91,27 @@ def _section_chunks(*, source_uri: str, document: Document) -> list[DocumentChun
         current_lines.append(line)
 
     flush()
+    sections = [
+        _with_chunk_position(chunk=chunk, chunk_index=index, chunk_count=len(sections))
+        for index, chunk in enumerate(sections)
+    ]
     return sections
+
+
+def _with_chunk_position(
+    *,
+    chunk: DocumentChunk,
+    chunk_index: int,
+    chunk_count: int,
+) -> DocumentChunk:
+    metadata = chunk.metadata.model_copy(
+        update={
+            "chunk_index": chunk_index,
+            "chunk_count": chunk_count,
+            "splitter": "MarkdownParser",
+        }
+    )
+    return chunk.model_copy(update={"metadata": metadata})
 
 
 def _read_markdown_file(source_uri: str) -> str:

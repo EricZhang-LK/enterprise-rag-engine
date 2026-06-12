@@ -13,10 +13,9 @@ RAG Demo，而是围绕文档解析、分块、混合检索、重排、引用溯
 结构化 PDF、表格降级、OCR Provider 抽象和 Parser Golden Dataset。下一阶段将进入
 chunk 分块系统建设。
 
-This repository is part of a 24-week LLM application engineering learning plan. The goal
-is not to build a toy RAG demo, but to gradually implement a system with document
-pipelines, chunking, hybrid retrieval, reranking, citations, evaluations, streaming APIs,
-multi-tenant controls, and observability.
+The goal is not to build a toy RAG demo, but to provide a maintainable backend foundation
+for document pipelines, chunking, hybrid retrieval, reranking, citations, evaluations,
+streaming APIs, multi-tenant controls, and observability.
 
 ## Current Milestone
 
@@ -66,8 +65,7 @@ multi-tenant controls, and observability.
 ```text
 enterprise-rag-engine/
 ├── docs/
-│   ├── adr/
-│   └── reports/
+│   └── adr/
 ├── datasets/
 ├── scripts/
 ├── src/
@@ -198,7 +196,6 @@ Supported settings:
 | `APP_VERSION` | `0.1.0` | Service version |
 | `LOG_LEVEL` | `INFO` | Python logging level |
 
-## Learning Notes
+## Architecture Decisions
 
-Each major design decision will be recorded in `docs/adr/`.
-Each benchmark or evaluation report will be recorded in `docs/reports/`.
+Major design decisions are recorded in `docs/adr/`.

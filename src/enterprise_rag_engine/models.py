@@ -3,7 +3,7 @@ from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class DocumentType(StrEnum):
@@ -20,6 +20,12 @@ class ChunkType(StrEnum):
     TABLE = "table"
     IMAGE = "image"
     FORMULA = "formula"
+
+
+class ChunkRole(StrEnum):
+    STANDALONE = "standalone"
+    PARENT = "parent"
+    CHILD = "child"
 
 
 class ParseStatus(StrEnum):
@@ -55,9 +61,37 @@ class ChunkMetadata(BaseModel):
     source_uri: str
     document_id: str
     page_number: int | None = Field(default=None, ge=1)
+    end_page_number: int | None = Field(default=None, ge=1)
     section_path: tuple[str, ...] = Field(default_factory=tuple)
     tenant_id: str | None = None
     content_hash: str | None = None
+    chunk_index: int | None = Field(default=None, ge=0)
+    chunk_count: int | None = Field(default=None, ge=1)
+    chunk_role: ChunkRole = ChunkRole.STANDALONE
+    splitter: str | None = None
+    token_count: int | None = Field(default=None, ge=0)
+    start_char: int | None = Field(default=None, ge=0)
+    end_char: int | None = Field(default=None, ge=0)
+    has_table: bool = False
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_ranges(self) -> "ChunkMetadata":
+        if (
+            self.page_number is not None
+            and self.end_page_number is not None
+            and self.end_page_number < self.page_number
+        ):
+            msg = "end_page_number must be greater than or equal to page_number"
+            raise ValueError(msg)
+        if (
+            self.start_char is not None
+            and self.end_char is not None
+            and self.end_char < self.start_char
+        ):
+            msg = "end_char must be greater than or equal to start_char"
+            raise ValueError(msg)
+        return self
 
 
 class DocumentChunk(BaseModel):

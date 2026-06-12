@@ -64,7 +64,15 @@ class StructuredPdfParser(BaseParser):
                 source_uri=source_uri,
                 document_id=document.id,
                 content_hash=sha256(markdown.encode("utf-8")).hexdigest(),
+                chunk_index=0,
+                chunk_count=1,
+                splitter="StructuredPdfParser",
+                start_char=0,
+                end_char=len(markdown),
+                metadata={"structured_format": "markdown", "backend": "docling"},
             ),
+            start_char=0,
+            end_char=len(markdown),
         )
         return ParseResult(
             document=document,

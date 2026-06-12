@@ -1,6 +1,6 @@
 import pytest
 
-from enterprise_rag_engine import Document, DocumentType, ParentChildSplitter
+from enterprise_rag_engine import ChunkRole, Document, DocumentType, ParentChildSplitter
 
 
 def test_parent_child_splitter_returns_parents_and_children() -> None:
@@ -26,6 +26,8 @@ def test_parent_child_splitter_returns_parents_and_children() -> None:
     assert len(parents) == 2
     assert len(children) > len(parents)
     assert {child.parent_id for child in children}.issubset({parent.id for parent in parents})
+    assert all(parent.metadata.chunk_role is ChunkRole.PARENT for parent in parents)
+    assert all(child.metadata.chunk_role is ChunkRole.CHILD for child in children)
 
 
 def test_parent_child_splitter_rebases_child_offsets_to_document() -> None:
@@ -70,6 +72,7 @@ def test_parent_child_splitter_preserves_document_metadata_on_children() -> None
     assert all(child.document_id == document.id for child in children)
     assert all(child.metadata.source_uri == document.source_uri for child in children)
     assert all(child.metadata.content_hash is not None for child in children)
+    assert all(child.metadata.metadata["parent_id"] == child.parent_id for child in children)
 
 
 def test_parent_child_splitter_rejects_child_larger_than_parent() -> None:

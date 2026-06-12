@@ -17,6 +17,12 @@ def test_recursive_splitter_keeps_short_document_as_single_chunk() -> None:
     assert chunks[0].metadata.source_uri == "demo.md"
     assert chunks[0].metadata.document_id == document.id
     assert chunks[0].metadata.content_hash is not None
+    assert chunks[0].metadata.splitter == "RecursiveSplitter"
+    assert chunks[0].metadata.chunk_index == 0
+    assert chunks[0].metadata.chunk_count == 1
+    assert chunks[0].metadata.token_count is not None
+    assert chunks[0].metadata.start_char == 0
+    assert chunks[0].metadata.end_char == len(document.content)
     assert chunks[0].start_char == 0
     assert chunks[0].end_char == len(document.content)
 

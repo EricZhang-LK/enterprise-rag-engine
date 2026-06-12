@@ -56,8 +56,15 @@ class PdfTextParser(BaseParser):
             metadata=metadata,
         )
         chunks = tuple(
-            _page_chunk(source_uri=source_uri, document_id=document.id, page_number=page, text=text)
-            for page, text in page_texts
+            _page_chunk(
+                source_uri=source_uri,
+                document_id=document.id,
+                page_number=page,
+                text=text,
+                chunk_index=index,
+                chunk_count=len(page_texts),
+            )
+            for index, (page, text) in enumerate(page_texts)
             if text
         )
 
@@ -94,6 +101,8 @@ def _page_chunk(
     document_id: str,
     page_number: int,
     text: str,
+    chunk_index: int,
+    chunk_count: int,
 ) -> DocumentChunk:
     # Page-level chunks are a safe first fallback before W3 introduces finer chunking strategies.
     return DocumentChunk(
@@ -103,8 +112,16 @@ def _page_chunk(
             source_uri=source_uri,
             document_id=document_id,
             page_number=page_number,
+            end_page_number=page_number,
             content_hash=sha256(text.encode("utf-8")).hexdigest(),
+            chunk_index=chunk_index,
+            chunk_count=chunk_count,
+            splitter="PdfTextParser",
+            start_char=0,
+            end_char=len(text),
         ),
+        start_char=0,
+        end_char=len(text),
     )
 
 

@@ -88,7 +88,7 @@ def _paragraph_chunks(
     chunks: list[DocumentChunk] = []
     heading_stack: list[str] = []
 
-    for paragraph in paragraphs:
+    for chunk_index, paragraph in enumerate(paragraphs):
         heading = _heading_level(paragraph.style_name)
         if heading is not None:
             heading_stack = heading_stack[: heading - 1]
@@ -103,7 +103,14 @@ def _paragraph_chunks(
                     document_id=document.id,
                     section_path=section_path,
                     content_hash=sha256(paragraph.text.encode("utf-8")).hexdigest(),
+                    chunk_index=chunk_index,
+                    chunk_count=len(paragraphs),
+                    splitter="DocxParser",
+                    start_char=0,
+                    end_char=len(paragraph.text),
                 ),
+                start_char=0,
+                end_char=len(paragraph.text),
             )
         )
 
