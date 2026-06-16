@@ -1,4 +1,5 @@
 import time
+from threading import Lock
 
 import pytest
 
@@ -24,6 +25,26 @@ class ExplodingParser(BaseParser):
         raise RuntimeError(f"boom: {source_uri}")
 
 
+class TrackingParser(BaseParser):
+    def __init__(self, *, sleep_seconds: float = 0.04) -> None:
+        self._sleep_seconds = sleep_seconds
+        self._lock = Lock()
+        self.active_count = 0
+        self.max_active_count = 0
+
+    def parse(self, source_uri: str) -> ParseResult:
+        with self._lock:
+            self.active_count += 1
+            self.max_active_count = max(self.max_active_count, self.active_count)
+        try:
+            time.sleep(self._sleep_seconds)
+            document = Document(source_uri=source_uri, type=DocumentType.TEXT, content=source_uri)
+            return ParseResult(document=document, status=ParseStatus.SUCCEEDED, elapsed_ms=1.0)
+        finally:
+            with self._lock:
+                self.active_count -= 1
+
+
 @pytest.mark.anyio
 async def test_async_document_pipeline_parses_one_source() -> None:
     pipeline = AsyncDocumentPipeline(SlowParser())
@@ -47,6 +68,32 @@ async def test_async_document_pipeline_parses_batch_concurrently() -> None:
 
 
 @pytest.mark.anyio
+async def test_async_document_pipeline_respects_max_concurrency() -> None:
+    parser = TrackingParser()
+    pipeline = AsyncDocumentPipeline(parser, max_concurrency=2, max_queue_size=2)
+
+    results = await pipeline.parse_many(("a.txt", "b.txt", "c.txt", "d.txt", "e.txt"))
+
+    assert [result.document.source_uri for result in results] == [
+        "a.txt",
+        "b.txt",
+        "c.txt",
+        "d.txt",
+        "e.txt",
+    ]
+    assert parser.max_active_count <= 2
+
+
+@pytest.mark.anyio
+async def test_async_document_pipeline_small_queue_still_preserves_order() -> None:
+    pipeline = AsyncDocumentPipeline(SlowParser(), max_concurrency=2, max_queue_size=1)
+
+    results = await pipeline.parse_many(("a.txt", "b.txt", "c.txt"))
+
+    assert [result.document.source_uri for result in results] == ["a.txt", "b.txt", "c.txt"]
+
+
+@pytest.mark.anyio
 async def test_async_document_pipeline_returns_failed_result_on_exception() -> None:
     pipeline = AsyncDocumentPipeline(ExplodingParser())
 
@@ -62,3 +109,11 @@ async def test_async_document_pipeline_accepts_empty_batch() -> None:
     pipeline = AsyncDocumentPipeline(SlowParser())
 
     assert await pipeline.parse_many(()) == ()
+
+
+def test_async_document_pipeline_rejects_invalid_concurrency_settings() -> None:
+    with pytest.raises(ValueError, match="max_concurrency"):
+        AsyncDocumentPipeline(SlowParser(), max_concurrency=0)
+
+    with pytest.raises(ValueError, match="max_queue_size"):
+        AsyncDocumentPipeline(SlowParser(), max_queue_size=0)
