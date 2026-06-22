@@ -1,6 +1,11 @@
 """Enterprise RAG Engine package."""
 
-from enterprise_rag_engine.document_pipeline import AsyncDocumentPipeline
+from enterprise_rag_engine.document_pipeline import (
+    AsyncDocumentPipeline,
+    CacheEntry,
+    CacheManager,
+    file_content_hash,
+)
 from enterprise_rag_engine.document_pipeline.parsers import (
     DocxParser,
     MarkdownParser,
@@ -40,6 +45,8 @@ from enterprise_rag_engine.models import (
     DocumentType,
     OCRResult,
     OcrStatus,
+    ParseProgressEvent,
+    ParseProgressStage,
     ParseResult,
     ParseStatus,
     RetrievalResult,
@@ -58,6 +65,8 @@ __all__ = [
     "BaseTokenCounter",
     "BaseVectorStore",
     "AsyncDocumentPipeline",
+    "CacheEntry",
+    "CacheManager",
     "ChunkMetadata",
     "ChunkRole",
     "ChunkType",
@@ -70,6 +79,8 @@ __all__ = [
     "OCRResult",
     "OcrDocumentParser",
     "OcrStatus",
+    "ParseProgressEvent",
+    "ParseProgressStage",
     "ParseResult",
     "ParseStatus",
     "ParentChildSplitter",
@@ -85,4 +96,5 @@ __all__ = [
     "TokenSpan",
     "TiktokenTokenCounter",
     "__version__",
+    "file_content_hash",
 ]

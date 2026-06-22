@@ -7,6 +7,8 @@ from enterprise_rag_engine import (
     AsyncDocumentPipeline,
     Document,
     DocumentType,
+    ParseProgressEvent,
+    ParseProgressStage,
     ParseResult,
     ParseStatus,
 )
@@ -117,3 +119,63 @@ def test_async_document_pipeline_rejects_invalid_concurrency_settings() -> None:
 
     with pytest.raises(ValueError, match="max_queue_size"):
         AsyncDocumentPipeline(SlowParser(), max_queue_size=0)
+
+
+@pytest.mark.anyio
+async def test_async_document_pipeline_emits_progress_events_for_one_source() -> None:
+    events: list[ParseProgressEvent] = []
+    pipeline = AsyncDocumentPipeline(SlowParser(), progress_handler=events.append)
+
+    result = await pipeline.parse("demo.txt", task_id="task-1")
+
+    assert result.status is ParseStatus.SUCCEEDED
+    assert [event.stage for event in events] == [
+        ParseProgressStage.STARTED,
+        ParseProgressStage.SUCCEEDED,
+    ]
+    assert {event.task_id for event in events} == {"task-1"}
+    assert events[-1].metadata["chunk_count"] == 0
+
+
+@pytest.mark.anyio
+async def test_async_document_pipeline_emits_queued_events_for_batch() -> None:
+    events: list[ParseProgressEvent] = []
+    pipeline = AsyncDocumentPipeline(
+        SlowParser(),
+        max_concurrency=2,
+        max_queue_size=1,
+        progress_handler=events.append,
+    )
+
+    await pipeline.parse_many(("a.txt", "b.txt"))
+
+    queued_events = [event for event in events if event.stage is ParseProgressStage.QUEUED]
+    assert [event.source_uri for event in queued_events] == ["a.txt", "b.txt"]
+    assert [event.metadata["queue_index"] for event in queued_events] == [0, 1]
+
+
+@pytest.mark.anyio
+async def test_async_document_pipeline_supports_async_progress_handler() -> None:
+    events: list[ParseProgressEvent] = []
+
+    async def collect_event(event: ParseProgressEvent) -> None:
+        events.append(event)
+
+    pipeline = AsyncDocumentPipeline(SlowParser(), progress_handler=collect_event)
+
+    await pipeline.parse("demo.txt")
+
+    assert events[-1].stage is ParseProgressStage.SUCCEEDED
+
+
+@pytest.mark.anyio
+async def test_async_document_pipeline_emits_failed_event_on_exception() -> None:
+    events: list[ParseProgressEvent] = []
+    pipeline = AsyncDocumentPipeline(ExplodingParser(), progress_handler=events.append)
+
+    result = await pipeline.parse("bad.txt", task_id="task-bad")
+
+    assert result.status is ParseStatus.FAILED
+    assert events[-1].stage is ParseProgressStage.FAILED
+    assert events[-1].status is ParseStatus.FAILED
+    assert events[-1].task_id == "task-bad"

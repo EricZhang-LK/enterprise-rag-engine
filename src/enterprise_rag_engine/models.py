@@ -34,6 +34,14 @@ class ParseStatus(StrEnum):
     FAILED = "failed"
 
 
+class ParseProgressStage(StrEnum):
+    QUEUED = "queued"
+    STARTED = "started"
+    CACHE_HIT = "cache_hit"
+    SUCCEEDED = "succeeded"
+    FAILED = "failed"
+
+
 class OcrStatus(StrEnum):
     SUCCEEDED = "succeeded"
     FAILED = "failed"
@@ -160,6 +168,21 @@ class ParseResult(BaseModel):
     @property
     def chunk_count(self) -> int:
         return len(self.chunks)
+
+
+class ParseProgressEvent(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    task_id: str
+    source_uri: str
+    stage: ParseProgressStage
+    progress: float = Field(ge=0, le=1)
+    status: ParseStatus | None = None
+    message: str | None = None
+    elapsed_ms: float | None = Field(default=None, ge=0)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class RetrievalResult(BaseModel):
