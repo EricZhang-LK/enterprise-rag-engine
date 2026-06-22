@@ -32,6 +32,7 @@ coverage.xml
 !.env.example
 
 # Local data and runtime output
+.data/
 data/
 tmp/
 logs/

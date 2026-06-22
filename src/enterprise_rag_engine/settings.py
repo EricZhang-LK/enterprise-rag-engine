@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field
@@ -16,6 +17,8 @@ class Settings(BaseSettings):
     app_env: Literal["dev", "test", "prod"] = Field(default="dev", alias="APP_ENV")
     app_version: str = Field(default="0.1.0", alias="APP_VERSION")
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
+    upload_dir: Path = Field(default=Path(".data/uploads"), alias="UPLOAD_DIR")
+    max_upload_bytes: int = Field(default=20 * 1024 * 1024, gt=0, alias="MAX_UPLOAD_BYTES")
 
 
 @lru_cache

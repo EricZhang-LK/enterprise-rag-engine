@@ -8,3 +8,5 @@ def test_settings_defaults() -> None:
     assert settings.app_env == "dev"
     assert settings.app_version == "0.1.0"
     assert settings.log_level == "INFO"
+    assert str(settings.upload_dir) == ".data\\uploads"
+    assert settings.max_upload_bytes == 20 * 1024 * 1024
