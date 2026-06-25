@@ -9,9 +9,6 @@ retrieval-augmented generation systems.
 RAG Demo，而是围绕文档解析、分块、混合检索、重排、引用溯源、自动化评测、
 流式 API、多租户边界和可观测性逐步构建的工程化作品。
 
-当前阶段已经完成 W1 工程基线和 W2 文档解析基础能力：PDF、Markdown、Word、
-结构化 PDF、表格降级、OCR Provider 抽象和 Parser Golden Dataset。下一阶段将进入
-chunk 分块系统建设。
 
 The goal is not to build a toy RAG demo, but to provide a maintainable backend foundation
 for document pipelines, chunking, hybrid retrieval, reranking, citations, evaluations,
