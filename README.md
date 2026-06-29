@@ -2,7 +2,15 @@
 
 面向企业知识库场景的 RAG 后端工程。当前版本聚焦可评测的文档摄取管道，已经具备多格式解析、结构保留、分块、异步并发、背压、内容缓存、任务进度与 FastAPI 上传接口。
 
-项目目标不是拼装一个聊天 Demo，而是逐步构建可维护、可测试、可观测、可量化的企业级 RAG 基础设施。
+## 中文简介
+
+`enterprise-rag-engine` 是一个面向企业级 RAG 的 Python 后端项目。它不是简单的
+RAG Demo，而是围绕文档解析、分块、混合检索、重排、引用溯源、自动化评测、
+流式 API、多租户边界和可观测性逐步构建的工程化作品。
+
+The goal is not to build a toy RAG demo, but to provide a maintainable backend foundation
+for document pipelines, chunking, hybrid retrieval, reranking, citations, evaluations,
+streaming APIs, multi-tenant controls, and observability.
 
 ## Current Milestone
 
