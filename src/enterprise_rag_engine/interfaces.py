@@ -4,12 +4,15 @@ from collections.abc import Sequence
 from enterprise_rag_engine.models import (
     Document,
     DocumentChunk,
+    Embedding,
     OCRResult,
     ParseResult,
     RetrievalResult,
+    VectorSearchRequest,
+    VectorStoreFilter,
+    VectorStoreRecord,
+    VectorStoreWriteResult,
 )
-
-Embedding = tuple[float, ...]
 
 
 class BaseParser(ABC):
@@ -40,22 +43,16 @@ class BaseVectorStore(ABC):
     """Persist and search chunk embeddings."""
 
     @abstractmethod
-    def upsert(self, chunks: Sequence[DocumentChunk], embeddings: Sequence[Embedding]) -> None:
-        """Insert or update chunk vectors."""
+    def upsert(self, records: Sequence[VectorStoreRecord]) -> VectorStoreWriteResult:
+        """Insert or update chunk vectors and return the write result."""
 
     @abstractmethod
-    def search(
-        self,
-        query_embedding: Embedding,
-        *,
-        top_k: int,
-        filters: dict[str, str] | None = None,
-    ) -> tuple[RetrievalResult, ...]:
+    def search(self, request: VectorSearchRequest) -> tuple[RetrievalResult, ...]:
         """Search for the most relevant chunks."""
 
     @abstractmethod
-    def delete(self, document_id: str) -> None:
-        """Delete all vectors associated with one document."""
+    def delete(self, filters: VectorStoreFilter) -> VectorStoreWriteResult:
+        """Delete vectors matching a filter."""
 
 
 class BaseRetriever(ABC):

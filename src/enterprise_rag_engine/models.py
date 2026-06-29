@@ -5,6 +5,9 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+Embedding = tuple[float, ...]
+FilterValue = str | int | float | bool
+
 
 class DocumentType(StrEnum):
     PDF = "pdf"
@@ -117,6 +120,92 @@ class DocumentChunk(BaseModel):
     @property
     def character_count(self) -> int:
         return len(self.content)
+
+    def metadata_payload(self) -> dict[str, Any]:
+        """Return filterable metadata fields shared by vector-store adapters."""
+
+        return {
+            "chunk_id": self.id,
+            "document_id": self.document_id,
+            "chunk_type": self.chunk_type.value,
+            "parent_id": self.parent_id,
+            "source_uri": self.metadata.source_uri,
+            "page_number": self.metadata.page_number,
+            "end_page_number": self.metadata.end_page_number,
+            "section_path": list(self.metadata.section_path),
+            "tenant_id": self.metadata.tenant_id,
+            "content_hash": self.metadata.content_hash,
+            "chunk_index": self.metadata.chunk_index,
+            "chunk_count": self.metadata.chunk_count,
+            "chunk_role": self.metadata.chunk_role.value,
+            "splitter": self.metadata.splitter,
+            "token_count": self.metadata.token_count,
+            "start_char": self.metadata.start_char,
+            "end_char": self.metadata.end_char,
+            "has_table": self.metadata.has_table,
+            "metadata": self.metadata.metadata,
+        }
+
+
+class VectorStoreFilter(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    conditions: dict[str, FilterValue] = Field(default_factory=dict)
+
+    @classmethod
+    def empty(cls) -> "VectorStoreFilter":
+        return cls()
+
+    @classmethod
+    def exact(cls, conditions: dict[str, FilterValue]) -> "VectorStoreFilter":
+        return cls(conditions=conditions)
+
+    @classmethod
+    def equals(cls, key: str, value: FilterValue) -> "VectorStoreFilter":
+        return cls(conditions={key: value})
+
+    @property
+    def is_empty(self) -> bool:
+        return not self.conditions
+
+    def matches_payload(self, payload: dict[str, Any]) -> bool:
+        return all(payload.get(key) == value for key, value in self.conditions.items())
+
+
+class VectorStoreRecord(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    chunk: DocumentChunk
+    embedding: Embedding
+
+    @model_validator(mode="after")
+    def validate_embedding(self) -> "VectorStoreRecord":
+        if not self.embedding:
+            msg = "embedding must not be empty"
+            raise ValueError(msg)
+        return self
+
+
+class VectorSearchRequest(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    query_embedding: Embedding
+    top_k: int = Field(gt=0)
+    filters: VectorStoreFilter = Field(default_factory=VectorStoreFilter.empty)
+    query_text: str | None = None
+
+    @model_validator(mode="after")
+    def validate_query_embedding(self) -> "VectorSearchRequest":
+        if not self.query_embedding:
+            msg = "query_embedding must not be empty"
+            raise ValueError(msg)
+        return self
+
+
+class VectorStoreWriteResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    affected_count: int = Field(ge=0)
 
 
 class TableBlock(BaseModel):

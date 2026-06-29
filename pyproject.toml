@@ -38,6 +38,9 @@ tokenization = [
     "tokenizers>=0.19",
     "transformers>=4.44",
 ]
+qdrant = [
+    "qdrant-client>=1.10",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]

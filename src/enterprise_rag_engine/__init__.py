@@ -34,7 +34,6 @@ from enterprise_rag_engine.interfaces import (
     BaseRetriever,
     BaseSplitter,
     BaseVectorStore,
-    Embedding,
 )
 from enterprise_rag_engine.models import (
     ChunkMetadata,
@@ -43,6 +42,7 @@ from enterprise_rag_engine.models import (
     Document,
     DocumentChunk,
     DocumentType,
+    Embedding,
     OCRResult,
     OcrStatus,
     ParseProgressEvent,
@@ -51,7 +51,12 @@ from enterprise_rag_engine.models import (
     ParseStatus,
     RetrievalResult,
     TableBlock,
+    VectorSearchRequest,
+    VectorStoreFilter,
+    VectorStoreRecord,
+    VectorStoreWriteResult,
 )
+from enterprise_rag_engine.retrieval import QdrantVectorStore
 
 __version__ = "0.1.0"
 
@@ -85,11 +90,16 @@ __all__ = [
     "ParseStatus",
     "ParentChildSplitter",
     "PdfTextParser",
+    "QdrantVectorStore",
     "RecursiveSplitter",
     "RetrievalResult",
     "SemanticSplitter",
     "StructuredPdfParser",
     "TableBlock",
+    "VectorSearchRequest",
+    "VectorStoreFilter",
+    "VectorStoreRecord",
+    "VectorStoreWriteResult",
     "HuggingFaceTokenCounter",
     "TokenBudget",
     "TokenCounter",
