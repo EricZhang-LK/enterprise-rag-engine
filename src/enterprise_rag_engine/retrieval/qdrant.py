@@ -13,6 +13,7 @@ from enterprise_rag_engine.models import (
     DocumentChunk,
     Embedding,
     RetrievalResult,
+    VectorFilterOperator,
     VectorSearchRequest,
     VectorStoreFilter,
     VectorStoreRecord,
@@ -200,10 +201,20 @@ def _metadata_filter(filters: VectorStoreFilter) -> dict[str, Any] | None:
         return None
     return {
         "must": [
-            {"key": key, "match": {"value": value}}
-            for key, value in filters.conditions.items()
+            _qdrant_condition(condition.key, condition.operator, condition.value)
+            for condition in filters.conditions
         ]
     }
+
+
+def _qdrant_condition(
+    key: str,
+    operator: VectorFilterOperator,
+    value: str | int | float | bool,
+) -> dict[str, Any]:
+    if operator is VectorFilterOperator.EQ:
+        return {"key": key, "match": {"value": value}}
+    return {"key": key, "range": {operator.value: value}}
 
 
 def _require_payload(payload: dict[str, Any] | None) -> dict[str, Any]:

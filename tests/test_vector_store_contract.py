@@ -3,6 +3,7 @@ from collections.abc import Sequence
 from enterprise_rag_engine import (
     BaseVectorStore,
     ChunkMetadata,
+    ChunkType,
     DocumentChunk,
     RetrievalResult,
     VectorSearchRequest,
@@ -75,6 +76,61 @@ def test_vector_store_filter_matches_multiple_exact_conditions() -> None:
 
     assert filters.matches_payload({"tenant_id": "tenant-a", "document_id": "doc-1"})
     assert not filters.matches_payload({"tenant_id": "tenant-a", "document_id": "doc-2"})
+
+
+def test_vector_store_filter_matches_tenant_document_page_and_chunk_type() -> None:
+    filters = VectorStoreFilter.metadata(
+        tenant_id="tenant-a",
+        document_id="doc-1",
+        page_number=3,
+        chunk_type=ChunkType.TEXT,
+    )
+
+    assert filters.matches_payload(
+        {
+            "tenant_id": "tenant-a",
+            "document_id": "doc-1",
+            "page_number": 2,
+            "end_page_number": 4,
+            "chunk_type": "text",
+        }
+    )
+    assert filters.matches_payload(
+        {
+            "tenant_id": "tenant-a",
+            "document_id": "doc-1",
+            "page_number": 3,
+            "end_page_number": None,
+            "chunk_type": "text",
+        }
+    )
+    assert not filters.matches_payload(
+        {
+            "tenant_id": "tenant-b",
+            "document_id": "doc-1",
+            "page_number": 3,
+            "end_page_number": 3,
+            "chunk_type": "text",
+        }
+    )
+    assert not filters.matches_payload(
+        {
+            "tenant_id": "tenant-a",
+            "document_id": "doc-1",
+            "page_number": 4,
+            "end_page_number": 5,
+            "chunk_type": "text",
+        }
+    )
+    assert not filters.matches_payload(
+        {
+            "tenant_id": "tenant-a",
+            "document_id": "doc-1",
+            "page_number": 3,
+            "end_page_number": 3,
+            "chunk_type": "table",
+        }
+    )
 
 
 def test_vector_search_request_rejects_invalid_top_k() -> None:

@@ -5,6 +5,7 @@ import pytest
 
 from enterprise_rag_engine import (
     ChunkMetadata,
+    ChunkType,
     DocumentChunk,
     VectorSearchRequest,
     VectorStoreFilter,
@@ -153,6 +154,34 @@ def test_qdrant_vector_store_delete_removes_points_by_document_id() -> None:
             },
         }
     ]
+
+
+def test_qdrant_vector_store_translates_metadata_filter_to_match_and_range() -> None:
+    client = FakeQdrantClient()
+    store = QdrantVectorStore(client=client, collection_name="rag_chunks", vector_size=3)
+
+    store.search(
+        VectorSearchRequest(
+            query_embedding=(0.3, 0.2, 0.1),
+            top_k=5,
+            filters=VectorStoreFilter.metadata(
+                tenant_id="tenant-a",
+                document_id="doc-1",
+                page_number=3,
+                chunk_type=ChunkType.TEXT,
+            ),
+        )
+    )
+
+    assert client.queries[0]["query_filter"] == {
+        "must": [
+            {"key": "tenant_id", "match": {"value": "tenant-a"}},
+            {"key": "document_id", "match": {"value": "doc-1"}},
+            {"key": "page_number", "range": {"lte": 3}},
+            {"key": "end_page_number", "range": {"gte": 3}},
+            {"key": "chunk_type", "match": {"value": "text"}},
+        ]
+    }
 
 
 def test_qdrant_vector_store_rejects_embedding_shape_mismatches() -> None:

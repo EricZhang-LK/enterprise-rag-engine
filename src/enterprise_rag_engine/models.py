@@ -150,7 +150,7 @@ class DocumentChunk(BaseModel):
 class VectorStoreFilter(BaseModel):
     model_config = ConfigDict(frozen=True)
 
-    conditions: dict[str, FilterValue] = Field(default_factory=dict)
+    conditions: tuple["VectorFilterCondition", ...] = Field(default_factory=tuple)
 
     @classmethod
     def empty(cls) -> "VectorStoreFilter":
@@ -158,18 +158,90 @@ class VectorStoreFilter(BaseModel):
 
     @classmethod
     def exact(cls, conditions: dict[str, FilterValue]) -> "VectorStoreFilter":
-        return cls(conditions=conditions)
+        return cls(
+            conditions=tuple(
+                VectorFilterCondition(key=key, value=value) for key, value in conditions.items()
+            )
+        )
 
     @classmethod
     def equals(cls, key: str, value: FilterValue) -> "VectorStoreFilter":
-        return cls(conditions={key: value})
+        return cls(conditions=(VectorFilterCondition(key=key, value=value),))
+
+    @classmethod
+    def metadata(
+        cls,
+        *,
+        tenant_id: str | None = None,
+        document_id: str | None = None,
+        page_number: int | None = None,
+        chunk_type: ChunkType | str | None = None,
+    ) -> "VectorStoreFilter":
+        conditions: list[VectorFilterCondition] = []
+        if tenant_id is not None:
+            conditions.append(VectorFilterCondition(key="tenant_id", value=tenant_id))
+        if document_id is not None:
+            conditions.append(VectorFilterCondition(key="document_id", value=document_id))
+        if page_number is not None:
+            conditions.extend(
+                (
+                    VectorFilterCondition(
+                        key="page_number",
+                        operator=VectorFilterOperator.LTE,
+                        value=page_number,
+                    ),
+                    VectorFilterCondition(
+                        key="end_page_number",
+                        operator=VectorFilterOperator.GTE,
+                        value=page_number,
+                    ),
+                )
+            )
+        if chunk_type is not None:
+            chunk_type_value = chunk_type.value if isinstance(chunk_type, ChunkType) else chunk_type
+            conditions.append(VectorFilterCondition(key="chunk_type", value=chunk_type_value))
+        return cls(conditions=tuple(conditions))
 
     @property
     def is_empty(self) -> bool:
         return not self.conditions
 
     def matches_payload(self, payload: dict[str, Any]) -> bool:
-        return all(payload.get(key) == value for key, value in self.conditions.items())
+        return all(condition.matches(payload) for condition in self.conditions)
+
+
+class VectorFilterOperator(StrEnum):
+    EQ = "eq"
+    LTE = "lte"
+    GTE = "gte"
+
+
+class VectorFilterCondition(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    key: str
+    value: FilterValue
+    operator: VectorFilterOperator = VectorFilterOperator.EQ
+
+    def matches(self, payload: dict[str, Any]) -> bool:
+        payload_value = _payload_value(payload, self.key)
+        if self.operator is VectorFilterOperator.EQ:
+            return bool(payload_value == self.value)
+        if payload_value is None:
+            return False
+        if not isinstance(payload_value, int | float) or not isinstance(self.value, int | float):
+            return False
+        if self.operator is VectorFilterOperator.LTE:
+            return payload_value <= self.value
+        if self.operator is VectorFilterOperator.GTE:
+            return payload_value >= self.value
+
+
+def _payload_value(payload: dict[str, Any], key: str) -> Any:
+    value = payload.get(key)
+    if key == "end_page_number" and value is None:
+        return payload.get("page_number")
+    return value
 
 
 class VectorStoreRecord(BaseModel):
