@@ -61,7 +61,12 @@ from enterprise_rag_engine.models import (
     VectorStoreRecord,
     VectorStoreWriteResult,
 )
-from enterprise_rag_engine.retrieval import QdrantVectorStore
+from enterprise_rag_engine.retrieval import (
+    BGE_M3_MODEL_NAME,
+    BgeM3Embedder,
+    QdrantVectorStore,
+    SentenceTransformerEmbedder,
+)
 
 __version__ = "0.1.0"
 
@@ -75,6 +80,8 @@ __all__ = [
     "BaseTokenCounter",
     "BaseVectorStore",
     "AsyncDocumentPipeline",
+    "BGE_M3_MODEL_NAME",
+    "BgeM3Embedder",
     "CacheEntry",
     "CacheManager",
     "ChunkMetadata",
@@ -102,6 +109,7 @@ __all__ = [
     "RecursiveSplitter",
     "RetrievalResult",
     "SemanticSplitter",
+    "SentenceTransformerEmbedder",
     "StructuredPdfParser",
     "TableBlock",
     "VectorFilterCondition",
