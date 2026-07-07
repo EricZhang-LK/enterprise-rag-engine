@@ -280,6 +280,70 @@ class VectorStoreWriteResult(BaseModel):
     affected_count: int = Field(ge=0)
 
 
+class EmbeddingRequest(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    texts: tuple[str, ...]
+    model: str | None = None
+    normalize: bool = True
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_texts(self) -> "EmbeddingRequest":
+        if not self.texts:
+            msg = "texts must not be empty"
+            raise ValueError(msg)
+        if any(not text.strip() for text in self.texts):
+            msg = "texts must not contain blank values"
+            raise ValueError(msg)
+        return self
+
+
+class EmbeddingResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    text: str
+    embedding: Embedding
+    model: str | None = None
+    token_count: int | None = Field(default=None, ge=0)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def validate_embedding(self) -> "EmbeddingResult":
+        if not self.embedding:
+            msg = "embedding must not be empty"
+            raise ValueError(msg)
+        return self
+
+
+class EmbeddingBatchResult(BaseModel):
+    model_config = ConfigDict(frozen=True)
+
+    results: tuple[EmbeddingResult, ...]
+    model: str | None = None
+    dimension: int = Field(gt=0)
+
+    @classmethod
+    def from_results(
+        cls,
+        *,
+        results: tuple[EmbeddingResult, ...],
+        model: str | None = None,
+    ) -> "EmbeddingBatchResult":
+        if not results:
+            msg = "embedding results must not be empty"
+            raise ValueError(msg)
+        dimensions = {len(result.embedding) for result in results}
+        if len(dimensions) != 1:
+            msg = "all embeddings must have the same dimension"
+            raise ValueError(msg)
+        return cls(results=results, model=model, dimension=dimensions.pop())
+
+    @property
+    def embeddings(self) -> tuple[Embedding, ...]:
+        return tuple(result.embedding for result in self.results)
+
+
 class TableBlock(BaseModel):
     model_config = ConfigDict(frozen=True)
 

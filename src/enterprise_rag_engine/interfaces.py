@@ -1,3 +1,4 @@
+import asyncio
 from abc import ABC, abstractmethod
 from collections.abc import Sequence
 
@@ -5,6 +6,8 @@ from enterprise_rag_engine.models import (
     Document,
     DocumentChunk,
     Embedding,
+    EmbeddingBatchResult,
+    EmbeddingRequest,
     OCRResult,
     ParseResult,
     RetrievalResult,
@@ -35,8 +38,18 @@ class BaseEmbedder(ABC):
     """Convert text inputs into embedding vectors."""
 
     @abstractmethod
+    def embed(self, request: EmbeddingRequest) -> EmbeddingBatchResult:
+        """Embed a batch of text inputs and return rich per-text results."""
+
+    async def aembed(self, request: EmbeddingRequest) -> EmbeddingBatchResult:
+        """Embed texts asynchronously using a thread wrapper by default."""
+
+        return await asyncio.to_thread(self.embed, request)
+
     def embed_texts(self, texts: Sequence[str]) -> tuple[Embedding, ...]:
-        """Embed a batch of text inputs."""
+        """Compatibility helper for callers that only need raw vectors."""
+
+        return self.embed(EmbeddingRequest(texts=tuple(texts))).embeddings
 
 
 class BaseVectorStore(ABC):
