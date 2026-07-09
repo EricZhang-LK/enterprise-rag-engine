@@ -64,8 +64,11 @@ from enterprise_rag_engine.models import (
 from enterprise_rag_engine.retrieval import (
     BGE_M3_MODEL_NAME,
     BgeM3Embedder,
+    BM25Retriever,
+    DenseRetriever,
     QdrantVectorStore,
     SentenceTransformerEmbedder,
+    default_bm25_tokenizer,
 )
 
 __version__ = "0.1.0"
@@ -81,6 +84,7 @@ __all__ = [
     "BaseVectorStore",
     "AsyncDocumentPipeline",
     "BGE_M3_MODEL_NAME",
+    "BM25Retriever",
     "BgeM3Embedder",
     "CacheEntry",
     "CacheManager",
@@ -91,6 +95,7 @@ __all__ = [
     "DocumentChunk",
     "DocumentType",
     "DocxParser",
+    "DenseRetriever",
     "Embedding",
     "EmbeddingBatchResult",
     "EmbeddingRequest",
@@ -118,6 +123,7 @@ __all__ = [
     "VectorStoreFilter",
     "VectorStoreRecord",
     "VectorStoreWriteResult",
+    "default_bm25_tokenizer",
     "HuggingFaceTokenCounter",
     "TokenBudget",
     "TokenCounter",
