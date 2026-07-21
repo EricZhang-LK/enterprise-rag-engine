@@ -82,6 +82,20 @@ class BaseRetriever(ABC):
         """Return ranked retrieval results for a query."""
 
 
+class BaseReranker(ABC):
+    """Re-score retrieved candidates for one query and return a new ranking."""
+
+    @abstractmethod
+    def rerank(
+        self,
+        query: str,
+        candidates: Sequence[RetrievalResult],
+        *,
+        top_k: int,
+    ) -> tuple[RetrievalResult, ...]:
+        """Return the highest-scoring candidates after precision-oriented re-ranking."""
+
+
 class BaseEvaluator(ABC):
     """Evaluate a component or pipeline and return numeric metrics."""
 

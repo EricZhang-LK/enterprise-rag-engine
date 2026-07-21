@@ -9,13 +9,19 @@ from enterprise_rag_engine.retrieval.embeddings import (
 )
 from enterprise_rag_engine.retrieval.hybrid import HybridRetriever
 from enterprise_rag_engine.retrieval.qdrant import QdrantVectorStore
+from enterprise_rag_engine.retrieval.reranker import (
+    BGE_RERANKER_V2_M3_MODEL_NAME,
+    CrossEncoderReranker,
+)
 from enterprise_rag_engine.retrieval.rrf import RRFusion
 
 __all__ = [
     "BGE_M3_MODEL_NAME",
+    "BGE_RERANKER_V2_M3_MODEL_NAME",
     "BM25Retriever",
     "BgeM3Embedder",
     "DenseRetriever",
+    "CrossEncoderReranker",
     "HybridRetriever",
     "QdrantVectorStore",
     "RRFusion",
