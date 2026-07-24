@@ -26,7 +26,12 @@ from enterprise_rag_engine.document_pipeline.tokenization import (
     TokenCounter,
     TokenSpan,
 )
-from enterprise_rag_engine.generation import PromptRegistry, PromptTemplate
+from enterprise_rag_engine.generation import (
+    ContextBuilder,
+    ContextBuildResult,
+    PromptRegistry,
+    PromptTemplate,
+)
 from enterprise_rag_engine.interfaces import (
     BaseEmbedder,
     BaseEvaluator,
@@ -100,6 +105,8 @@ __all__ = [
     "ChunkMetadata",
     "ChunkRole",
     "ChunkType",
+    "ContextBuilder",
+    "ContextBuildResult",
     "CrossEncoderReranker",
     "Document",
     "DocumentChunk",
