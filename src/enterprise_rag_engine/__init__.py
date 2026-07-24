@@ -26,6 +26,7 @@ from enterprise_rag_engine.document_pipeline.tokenization import (
     TokenCounter,
     TokenSpan,
 )
+from enterprise_rag_engine.generation import PromptRegistry, PromptTemplate
 from enterprise_rag_engine.interfaces import (
     BaseEmbedder,
     BaseEvaluator,
@@ -73,6 +74,7 @@ from enterprise_rag_engine.retrieval import (
     QdrantVectorStore,
     RRFusion,
     SentenceTransformerEmbedder,
+    TwoStageRetriever,
     default_bm25_tokenizer,
 )
 
@@ -117,6 +119,8 @@ __all__ = [
     "ParseResult",
     "ParseStatus",
     "ParentChildSplitter",
+    "PromptRegistry",
+    "PromptTemplate",
     "PdfTextParser",
     "QdrantVectorStore",
     "RecursiveSplitter",
@@ -139,6 +143,7 @@ __all__ = [
     "TokenCounter",
     "TokenSpan",
     "TiktokenTokenCounter",
+    "TwoStageRetriever",
     "__version__",
     "file_content_hash",
 ]

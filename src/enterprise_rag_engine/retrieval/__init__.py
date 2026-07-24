@@ -8,6 +8,7 @@ from enterprise_rag_engine.retrieval.embeddings import (
     SentenceTransformerEmbedder,
 )
 from enterprise_rag_engine.retrieval.hybrid import HybridRetriever
+from enterprise_rag_engine.retrieval.pipeline import TwoStageRetriever
 from enterprise_rag_engine.retrieval.qdrant import QdrantVectorStore
 from enterprise_rag_engine.retrieval.reranker import (
     BGE_RERANKER_V2_M3_MODEL_NAME,
@@ -26,5 +27,6 @@ __all__ = [
     "QdrantVectorStore",
     "RRFusion",
     "SentenceTransformerEmbedder",
+    "TwoStageRetriever",
     "default_bm25_tokenizer",
 ]
